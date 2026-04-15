@@ -1,0 +1,50 @@
+[
+  {
+    "question": "What is the time complexity of a single for loop that runs from 1 to n?",
+    "ground_truth": "A single for loop running from 1 to n has a time complexity of O(n), because the loop body executes exactly n times proportional to the input size."
+  },
+  {
+    "question": "What is the time complexity of two nested for loops each running from 1 to n?",
+    "ground_truth": "Two nested for loops each running from 1 to n have a time complexity of O(n squared), because the inner loop executes n times for each of the n iterations of the outer loop, giving n times n total operations."
+  },
+  {
+    "question": "What happens to the time complexity when a loop variable is doubled each iteration instead of incremented?",
+    "ground_truth": "When a loop variable is doubled each iteration, the loop runs approximately log base 2 of n times, giving a time complexity of O(log n), because doubling reduces the number of iterations logarithmically."
+  },
+  {
+    "question": "What is the time complexity of a loop where the outer loop runs n times and the inner loop runs log n times?",
+    "ground_truth": "When the outer loop runs n times and the inner loop runs log n times, the combined time complexity is O(n log n), which is the product of the two independent loop counts."
+  },
+  {
+    "question": "How do you determine the time complexity of a loop where the iteration count depends on dividing by a constant factor each time?",
+    "ground_truth": "When a loop divides its counter by a constant factor each iteration, the number of iterations is logarithmic. If the factor is 2, it runs log base 2 of n times, giving O(log n) complexity."
+  },
+  {
+    "question": "What is the time complexity when three nested loops each iterate n times?",
+    "ground_truth": "Three nested loops each iterating n times produce a time complexity of O(n cubed), because each nesting level multiplies the iteration count by n."
+  },
+  {
+    "question": "What is the difference between O(n) and O(n squared) in terms of algorithm performance?",
+    "ground_truth": "O(n) grows linearly with input size while O(n squared) grows quadratically. For large inputs, an O(n squared) algorithm becomes significantly slower, for example at n equals 1000, O(n) performs 1000 operations while O(n squared) performs 1 million operations."
+  },
+  {
+    "question": "How is the complexity of consecutive independent loops calculated?",
+    "ground_truth": "The complexity of consecutive independent loops is calculated by taking the maximum of their individual complexities. For example, a loop with O(n) followed by a loop with O(n squared) gives an overall complexity of O(n squared), not their sum."
+  },
+  {
+    "question": "What does it mean for an algorithm to have O(1) constant time complexity?",
+    "ground_truth": "O(1) constant time complexity means the algorithm takes the same amount of time regardless of input size. The number of operations does not grow with n."
+  },
+  {
+    "question": "How is the complexity analysed when a loop runs from i equals 1 to n and an inner statement runs i times?",
+    "ground_truth": "When the outer loop runs from 1 to n and an inner statement runs i times, the total operations are the sum from 1 to n which equals n times n plus 1 divided by 2, giving a time complexity of O(n squared)."
+  },
+  {
+    "question": "What is the time complexity of binary search?",
+    "ground_truth": "Binary search has a time complexity of O(log n) because each step halves the search space, resulting in at most log base 2 of n comparisons to find the target element."
+  },
+  {
+    "question": "What is the time complexity of bubble sort in the worst case?",
+    "ground_truth": "Bubble sort has a worst case time complexity of O(n squared) because it uses two nested loops each running up to n times to compare and swap adjacent elements."
+  }
+]

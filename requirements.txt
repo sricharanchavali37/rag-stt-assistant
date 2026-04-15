@@ -1,0 +1,17 @@
+# Phase 1
+pydantic
+pydantic-settings
+
+# Phase 2
+pdfplumber
+langchain
+langchain-community
+sentence-transformers
+chromadb
+
+# Phase 3
+fastapi
+uvicorn
+openai-whisper
+httpx
+python-multipart

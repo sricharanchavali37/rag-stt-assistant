@@ -1,0 +1,4 @@
+A single for loop running from 1 to N has time complexity O(N).
+Two nested loops each running to N have time complexity O(N^2).
+A loop that divides its counter by 2 each iteration runs log2(N) times: O(log N).
+Three nested loops each running to N give O(N^3).

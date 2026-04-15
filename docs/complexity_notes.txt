@@ -1,0 +1,13 @@
+Single for loop from 1 to n → O(n)
+
+Two nested loops → O(n^2)
+
+Three nested loops → O(n^3)
+
+Loop doubling each iteration → O(log n)
+
+Binary search → O(log n)
+
+Bubble sort worst case → O(n^2)
+
+Outer loop n, inner log n → O(n log n)

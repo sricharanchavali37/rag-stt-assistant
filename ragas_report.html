@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>RAGAS Report</title>
+</head>
+<body style="font-family:sans-serif;background:#f5f5f5;padding:20px">
+
+<h1>RAGAS Evaluation Report</h1>
+<p>Generated: 2026-04-14 23:32</p>
+
+
+        <div style="background:#fff3cd;border:1px solid #ffeeba;
+                    padding:12px 16px;border-radius:8px;margin-bottom:20px;
+                    color:#856404;font-size:13px">
+          ⚠ Detected <strong>4</strong> NaN metric values.
+          This indicates evaluation instability (retriever issues or judge failure).
+        </div>
+        
+
+<h2>Aggregate Scores</h2>
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:12px;
+                    padding:20px 24px;flex:1;min-width:180px">
+          <div style="font-size:13px;color:#666;margin-bottom:6px">Faithfulness</div>
+          <div style="font-size:28px;font-weight:600;color:#E24B4A">N/A</div>
+          <div style="font-size:12px;color:#E24B4A;margin-bottom:8px">N/A</div>
+          <div style="background:#eee;border-radius:6px;height:10px;width:100%;margin-top:4px"><div style="background:#E24B4A;width:0%;height:10px;border-radius:6px;transition:width 0.4s"></div></div>
+          <div style="font-size:11px;color:#999;margin-top:10px;line-height:1.4">Is the answer grounded in the retrieved context? Penalises hallucination.</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:12px;
+                    padding:20px 24px;flex:1;min-width:180px">
+          <div style="font-size:13px;color:#666;margin-bottom:6px">Answer Relevancy</div>
+          <div style="font-size:28px;font-weight:600;color:#E24B4A">N/A</div>
+          <div style="font-size:12px;color:#E24B4A;margin-bottom:8px">N/A</div>
+          <div style="background:#eee;border-radius:6px;height:10px;width:100%;margin-top:4px"><div style="background:#E24B4A;width:0%;height:10px;border-radius:6px;transition:width 0.4s"></div></div>
+          <div style="font-size:11px;color:#999;margin-top:10px;line-height:1.4">Does the answer actually address the question asked?</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:12px;
+                    padding:20px 24px;flex:1;min-width:180px">
+          <div style="font-size:13px;color:#666;margin-bottom:6px">Context Precision</div>
+          <div style="font-size:28px;font-weight:600;color:#E24B4A">N/A</div>
+          <div style="font-size:12px;color:#E24B4A;margin-bottom:8px">N/A</div>
+          <div style="background:#eee;border-radius:6px;height:10px;width:100%;margin-top:4px"><div style="background:#E24B4A;width:0%;height:10px;border-radius:6px;transition:width 0.4s"></div></div>
+          <div style="font-size:11px;color:#999;margin-top:10px;line-height:1.4">Are the retrieved chunks relevant to the question?</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:12px;
+                    padding:20px 24px;flex:1;min-width:180px">
+          <div style="font-size:13px;color:#666;margin-bottom:6px">Context Recall</div>
+          <div style="font-size:28px;font-weight:600;color:#E24B4A">N/A</div>
+          <div style="font-size:12px;color:#E24B4A;margin-bottom:8px">N/A</div>
+          <div style="background:#eee;border-radius:6px;height:10px;width:100%;margin-top:4px"><div style="background:#E24B4A;width:0%;height:10px;border-radius:6px;transition:width 0.4s"></div></div>
+          <div style="font-size:11px;color:#999;margin-top:10px;line-height:1.4">Were all relevant document passages retrieved?</div>
+        </div>
+</div>
+
+<h2>Per Question</h2>
+<table style="width:100%;border-collapse:collapse">
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Answer</th>
+<th>Faith</th>
+<th>Rel</th>
+<th>Prec</th>
+<th>Rec</th>
+</tr>
+</thead>
+<tbody>
+
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">1</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the time complexity of a single for loop that runs from 1 to n?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">2</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the time complexity of two nested for loops each running from 1 to n?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">3</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What happens to the time complexity when a loop variable is doubled each iteration instead of incremented?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">4</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the time complexity of a loop where the outer loop runs n times and the inner loop runs log n times?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">5</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">How do you determine the time complexity of a loop where the iteration count depends on dividing by a constant factor each time?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">6</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the time complexity when three nested loops each iterate n times?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">7</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the difference between O(n) and O(n squared) in terms of algorithm performance?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">8</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">How is the complexity of consecutive independent loops calculated?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">9</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What does it mean for an algorithm to have O(1) constant time complexity?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">10</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">How is the complexity analysed when a loop runs from i equals 1 to n and an inner statement runs i times?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">11</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the time complexity of binary search?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f0f0f0">
+          <td style="padding:10px 8px;color:#555;font-size:12px;min-width:30px;
+                     text-align:center">12</td>
+          <td style="padding:10px 8px;font-size:13px;max-width:280px">What is the time complexity of bubble sort in the worst case?</td>
+          <td style="padding:10px 8px;font-size:12px;color:#444;max-width:220px">ERROR: </td>
+          <td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td><td style="text-align:center;font-weight:600;color:#E24B4A;padding:10px 8px">—</td>
+        </tr>
+</tbody>
+</table>
+
+<h2>Interpretation</h2>
+
+
+</body>
+</html>
