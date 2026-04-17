@@ -4,7 +4,7 @@ services:
   rag-api:
     build: .
     ports:
-      - "8000:8000"
+      - "8002:8000"
     volumes:
       - ./chroma_db:/app/chroma_db
       - ./docs:/app/docs
