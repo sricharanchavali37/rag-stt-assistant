@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG STT Assistant</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Circular+Std:wght@400;500;700&display=swap');
+
+  :root {
+    --bg:        #121212;
+    --surface:   #181818;
+    --surface2:  #1f1f1f;
+    --surface3:  #252525;
+    --green:     #1ed760;
+    --green-dark:#1db954;
+    --text:      #ffffff;
+    --text-dim:  #b3b3b3;
+    --text-near: #cbcbcb;
+    --border:    #4d4d4d;
+    --border-lt: #7c7c7c;
+    --red:       #f3727f;
+    --shadow-sm: rgba(0,0,0,0.3) 0px 8px 8px;
+    --shadow-lg: rgba(0,0,0,0.5) 0px 8px 24px;
+    --font: 'Circular Std', 'Helvetica Neue', helvetica, arial, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    min-height: calc(100vh - 72px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg);
+    padding: 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-right: 1px solid #1a1a1a;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px 20px;
+  }
+
+  .logo svg { fill: var(--green); }
+
+  .logo-text {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .nav-section {
+    padding: 8px 12px 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--text); font-weight: 700; }
+  .nav-item.active .nav-icon { color: var(--green); }
+
+  .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+
+  .sidebar-divider {
+    height: 1px;
+    background: #2a2a2a;
+    margin: 12px 12px;
+  }
+
+  .system-status {
+    margin-top: auto;
+    padding: 12px;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .status-row:hover { background: var(--surface3); }
+
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .dot.error  { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    flex: 1;
+    padding: 32px 32px 48px;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #1a1a2e 0%, var(--bg) 300px);
+  }
+
+  .page-header {
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: normal;
+  }
+
+  .page-sub {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card:hover { background: #1c1c1c; }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+
+  .tab-btn {
+    padding: 8px 20px;
+    border-radius: 9999px;
+    border: 1px solid var(--border-lt);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tab-btn:hover { border-color: var(--text); color: var(--text); }
+
+  .tab-btn.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: #121212;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 1px dashed var(--border-lt);
+    border-radius: 8px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .upload-zone:hover, .upload-zone.drag {
+    border-color: var(--green);
+    background: rgba(30,215,96,0.04);
+  }
+
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0;
+    cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .upload-icon-wrap {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+  }
+
+  .upload-zone h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .upload-zone p {
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 6px 16px;
+    background: rgba(30,215,96,0.1);
+    border: 1px solid rgba(30,215,96,0.3);
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    display: none;
+  }
+
+  /* ── RECORD ── */
+  .record-center {
+    text-align: center;
+    padding: 16px 0 8px;
+  }
+
+  .big-record-btn {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--border-lt);
+    color: var(--text);
+    font-size: 26px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .big-record-btn:hover {
+    border-color: var(--green);
+    transform: scale(1.05);
+  }
+
+  .big-record-btn.recording {
+    background: #2a0a0a;
+    border-color: var(--red);
+    animation: rec-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes rec-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(243,114,127,0.5); }
+    50%       { box-shadow: 0 0 0 16px rgba(243,114,127,0); }
+  }
+
+  .timer-display {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .record-hint {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-dim);
+  }
+
+  .record-hint.live { color: var(--red); }
+
+  /* ── SUBMIT BUTTON ── */
+  .submit-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px 32px;
+    background: var(--green);
+    color: #000000;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 500px;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: #1fdf64;
+    transform: scale(1.02);
+  }
+
+  .submit-btn:disabled {
+    background: var(--surface2);
+    color: var(--border);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* progress */
+  .prog-track {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-top: 14px;
+    overflow: hidden;
+    display: none;
+  }
+  .prog-track.active { display: block; }
+  .prog-fill {
+    height: 100%;
+    width: 35%;
+    background: var(--green);
+    border-radius: 2px;
+    animation: prog-slide 1.4s ease-in-out infinite;
+  }
+  @keyframes prog-slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+  }
+
+  /* ── ERROR ── */
+  .error-box {
+    background: rgba(243,114,127,0.07);
+    border: 1px solid rgba(243,114,127,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 13px;
+    color: var(--red);
+    font-weight: 700;
+    display: none;
+    margin-bottom: 16px;
+  }
+  .error-box.show { display: block; }
+
+  /* ── RESULTS ── */
+  .results { display: none; }
+  .results.show { display: block; }
+
+  .result-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .transcription-card {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--green);
+  }
+
+  .transcription-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: capitalize;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .transcription-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .answer-card {
+    background: var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+  }
+
+  .answer-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .answer-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-dim);
+  }
+
+  .grounded-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .grounded-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .answer-body {
+    padding: 20px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .sources-row {
+    padding: 14px 20px;
+    border-top: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sources-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+
+  .source-pill {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    background: var(--surface2);
+  }
+
+  .meta-bar {
+    padding: 10px 20px;
+    border-top: 1px solid #2a2a2a;
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .meta-bar strong { color: var(--text-near); font-weight: 700; }
+
+  /* ── NOW PLAYING BAR ── */
+  .now-bar {
+    height: 72px;
+    background: var(--surface);
+    border-top: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+  }
+
+  .now-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .now-thumb {
+    width: 44px; height: 44px;
+    border-radius: 4px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .now-info { min-width: 0; }
+
+  .now-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .now-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .bar-model {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--text-dim);
+  }
+
+  .bar-pills {
+    display: flex;
+    gap: 6px;
+  }
+
+  .bar-pill {
+    padding: 3px 12px;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 20px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.622.622 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.622.622 0 11-.277-1.215c3.809-.87 7.076-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.722a.78.78 0 01-1.072.257C14.19 12.226 11.061 11.7 7.2 12.78a.781.781 0 01-.96-.527.78.78 0 01.527-.96c4.334-1.317 7.787-.67 10.786 1.137a.78.78 0 01.256 1.072zm.105-2.835C14.692 9.07 10.461 8.933 7.036 9.97a.937.937 0 11-.543-1.794c3.875-1.176 10.318-.948 14.389 1.619a.937.937 0 01-1.969.072z"/>
+      </svg>
+      <span class="logo-text">RAG STT</span>
+    </div>
+
+    <span class="nav-section">Assistant</span>
+    <a class="nav-item active" href="#">
+      <span class="nav-icon">🎙</span> Query
+    </a>
+    <a class="nav-item" href="/docs" target="_blank">
+      <span class="nav-icon">📄</span> API Docs
+    </a>
+
+    <div class="sidebar-divider"></div>
+
+    <span class="nav-section">System</span>
+    <a class="nav-item" href="#" onclick="checkHealth()">
+      <span class="nav-icon">⚡</span> Health Check
+    </a>
+
+    <div class="system-status">
+      <div class="status-row" onclick="checkHealth()">
+        <div class="status-left">
+          <span class="dot" id="status-dot"></span>
+          <span id="status-text">Connecting...</span>
+        </div>
+        <span style="font-size:10px; color:var(--text-dim)">↺</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+    <div class="page-header">
+      <h1 class="page-title">Speech-to-Text Knowledge Assistant</h1>
+      <p class="page-sub">Upload or record audio — get answers grounded in your documents.</p>
+    </div>
+
+    <!-- Input card -->
+    <div class="card">
+      <div class="card-title">Input</div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('upload', this)">Upload File</button>
+        <button class="tab-btn" onclick="switchTab('record', this)">Live Record</button>
+      </div>
+
+      <!-- Upload -->
+      <div class="tab-panel active" id="panel-upload">
+        <div class="upload-zone" id="drop-zone">
+          <input type="file" id="audio-file" accept="audio/*" onchange="onFileSelect(this)">
+          <div class="upload-icon-wrap">🎵</div>
+          <h3>Drop audio file here</h3>
+          <p>or click to browse — WAV, MP3, M4A, OGG</p>
+          <div class="file-badge" id="file-badge">
+            <span>✓</span><span id="file-name-text"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Record -->
+      <div class="tab-panel" id="panel-record">
+        <div class="record-center">
+          <button class="big-record-btn" id="record-btn" onclick="toggleRecord()">🎤</button>
+          <div class="timer-display" id="timer">00:00</div>
+          <div class="record-hint" id="record-hint">Click to start recording</div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitQuery()" disabled>
+        Ask Question →
+      </button>
+
+      <div class="prog-track" id="progress-bar">
+        <div class="prog-fill"></div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="error-box"></div>
+
+    <!-- Results -->
+    <div class="results" id="results">
+
+      <div class="result-section-title">Response</div>
+
+      <div class="transcription-card">
+        <div class="transcription-label">Transcription — Whisper</div>
+        <div class="transcription-text" id="result-transcription"></div>
+      </div>
+
+      <div class="answer-card">
+        <div class="answer-header">
+          <span class="answer-label">Grounded Answer</span>
+          <span class="grounded-badge">
+            <span class="grounded-dot"></span>
+            RAG Grounded
+          </span>
+        </div>
+        <div class="answer-body" id="result-answer"></div>
+        <div class="sources-row" id="result-sources">
+          <span class="sources-label">Sources</span>
+        </div>
+        <div class="meta-bar" id="result-meta"></div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- ── NOW PLAYING BAR ── -->
+<div class="now-bar">
+  <div class="now-track">
+    <div class="now-thumb">🤖</div>
+    <div class="now-info">
+      <div class="now-name" id="bar-question">Waiting for query...</div>
+      <div class="now-sub">RAG STT Knowledge Assistant</div>
+    </div>
+  </div>
+  <span class="bar-model">LLM: llama3:8b</span>
+  <div class="bar-pills">
+    <span class="bar-pill">Whisper</span>
+    <span class="bar-pill">MiniLM</span>
+    <span class="bar-pill">ChromaDB</span>
+    <span class="bar-pill">Ollama</span>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:8000';
+  let audioBlob = null;
+  let mediaRecorder = null;
+  let recordChunks = [];
+  let timerInterval = null;
+  let seconds = 0;
+
+  async function checkHealth() {
+    const dot  = document.getElementById('status-dot');
+    const txt  = document.getElementById('status-text');
+    txt.textContent = 'Checking...';
+    try {
+      const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(4000) });
+      if (r.ok) {
+        dot.className = 'dot online';
+        txt.textContent = 'Online';
+      } else { throw new Error(); }
+    } catch {
+      dot.className = 'dot error';
+      txt.textContent = 'Offline';
+    }
+  }
+
+  checkHealth();
+
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`panel-${name}`).classList.add('active');
+    audioBlob = null;
+    document.getElementById('submit-btn').disabled = true;
+  }
+
+  function onFileSelect(input) {
+    if (!input.files[0]) return;
+    audioBlob = input.files[0];
+    const badge = document.getElementById('file-badge');
+    document.getElementById('file-name-text').textContent = input.files[0].name;
+    badge.style.display = 'inline-flex';
+    document.getElementById('submit-btn').disabled = false;
+  }
+
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('audio/')) {
+      audioBlob = f;
+      document.getElementById('file-name-text').textContent = f.name;
+      document.getElementById('file-badge').style.display = 'inline-flex';
+      document.getElementById('submit-btn').disabled = false;
+    }
+  });
+
+  async function toggleRecord() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') await startRecord();
+    else stopRecord();
+  }
+
+  async function startRecord() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      recordChunks = [];
+      mediaRecorder.ondataavailable = e => recordChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(recordChunks, { type: 'audio/webm' });
+        document.getElementById('submit-btn').disabled = false;
+        document.getElementById('record-hint').textContent = 'Recording ready — click Ask Question';
+        document.getElementById('record-hint').classList.remove('live');
+      };
+      mediaRecorder.start();
+      seconds = 0;
+      timerInterval = setInterval(() => {
+        seconds++;
+        document.getElementById('timer').textContent =
+          String(Math.floor(seconds/60)).padStart(2,'0') + ':' +
+          String(seconds % 60).padStart(2,'0');
+      }, 1000);
+      document.getElementById('record-btn').classList.add('recording');
+      document.getElementById('record-btn').textContent = '⏹';
+      document.getElementById('record-hint').textContent = 'Recording... click to stop';
+      document.getElementById('record-hint').classList.add('live');
+    } catch {
+      showError('Microphone access denied. Allow microphone permissions and try again.');
+    }
+  }
+
+  function stopRecord() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    }
+    clearInterval(timerInterval);
+    document.getElementById('record-btn').classList.remove('recording');
+    document.getElementById('record-btn').textContent = '🎤';
+  }
+
+  async function submitQuery() {
+    if (!audioBlob) return;
+    const btn  = document.getElementById('submit-btn');
+    const bar  = document.getElementById('progress-bar');
+    const err  = document.getElementById('error-box');
+    const res  = document.getElementById('results');
+
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    bar.classList.add('active');
+    err.classList.remove('show');
+    res.classList.remove('show');
+
+    try {
+      const fd = new FormData();
+      fd.append('audio_file', audioBlob, audioBlob.name || 'recording.webm');
+
+      const r = await fetch(`${API}/query`, {
+        method: 'POST', body: fd,
+        signal: AbortSignal.timeout(180000)
+      });
+      const data = await r.json();
+      if (!r.ok || data.error) throw new Error(data.error || data.detail || 'Server error');
+      render(data);
+    } catch (e) {
+      showError(e.message || 'Request failed. Make sure the server is running on port 8000.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Ask Question →';
+      bar.classList.remove('active');
+    }
+  }
+
+  function render(data) {
+    const q = data.transcription || data.query || '—';
+    document.getElementById('result-transcription').textContent = q;
+    document.getElementById('result-answer').textContent = data.answer || '—';
+    document.getElementById('bar-question').textContent = q;
+
+    const src = document.getElementById('result-sources');
+    src.innerHTML = '<span class="sources-label">Sources</span>';
+    (data.sources || []).forEach(s => {
+      const p = document.createElement('span');
+      p.className = 'source-pill';
+      p.textContent = s;
+      src.appendChild(p);
+    });
+
+    document.getElementById('result-meta').innerHTML =
+      `<span>Chunks used: <strong>${data.chunks_used ?? '—'}</strong></span>` +
+      `<span>Model: <strong>llama3:8b</strong></span>` +
+      `<span>STT: <strong>Whisper base</strong></span>`;
+
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-box');
+    el.textContent = 'Error: ' + msg;
+    el.classList.add('show');
+  }
+</script>
+</body>
+</html>

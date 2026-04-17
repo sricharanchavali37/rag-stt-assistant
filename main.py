@@ -10,7 +10,8 @@ import whisper
 import chromadb
 from sentence_transformers import SentenceTransformer
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from config import settings
 from routers.query import router as query_router
@@ -42,7 +43,7 @@ async def lifespan(app: FastAPI):
 
     print(f"\n✅ All models loaded. Server is ready.\n")
 
-    yield  # app runs here — everything after yield runs on shutdown
+    yield  # app runs here
 
     print("\n[shutdown] Cleaning up ...")
 
@@ -55,6 +56,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# ── Static files setup (NEW) ─────────────────────────────────────────────────
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # ── Routes ───────────────────────────────────────────────────────────────────
@@ -77,11 +82,8 @@ async def health():
     })
 
 
+# ── Root route (REPLACED, not duplicated) ────────────────────────────────────
+
 @app.get("/")
-async def root():
-    return JSONResponse({
-        "message": "RAG STT Assistant is running.",
-        "docs": "/docs",
-        "health": "/health",
-        "query": "POST /query  (multipart audio_file)"
-    })
+def root():
+    return FileResponse("static/index.html")
