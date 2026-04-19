@@ -1,538 +1,280 @@
-\# RAG-Based Speech-to-Text Knowledge Assistant
+# RAG STT Assistant
 
+> 100% Local · No Cloud · No API Keys · CPU Only
 
+A fully local Retrieval-Augmented Generation (RAG) system that accepts spoken audio, transcribes it using Whisper, retrieves relevant context from your own PDF documents using semantic vector search, and generates grounded answers using a local LLM — running entirely on CPU with no external dependencies.
 
-A fully local \*\*Retrieval-Augmented Generation (RAG)\*\* system that answers user queries from document knowledge bases using \*\*speech input\*\*, while ensuring responses remain grounded and non-hallucinatory.
+![Architecture](assets/architecture.svg)
 
+---
 
+## Stack
 
-\---
+| Component | Technology |
+|---|---|
+| Speech-to-Text | OpenAI Whisper (medium, CPU) |
+| Vector Store | ChromaDB (persistent, local) |
+| Embeddings | sentence-transformers/all-MiniLM-L6-v2 |
+| LLM | Ollama llama3.2:1b (local) |
+| API | FastAPI + Uvicorn |
+| PDF Parsing | pdfplumber |
+| Frontend | Vanilla HTML/CSS served via FastAPI |
 
+---
 
+## What It Does
 
-\## Overview
+**The Problem:** LLMs hallucinate — they generate confident answers from training memory rather than from your actual documents. A general-purpose model has no knowledge of your company policies, your study material, or your proprietary data.
 
+**The Solution:** Before answering, this system retrieves the most semantically relevant passages from your indexed PDFs using vector similarity search. The LLM then generates an answer strictly from those retrieved chunks. If the answer is not in the documents, the system says so — it refuses to fabricate.
 
+**Intelligent Mode Switching:**
+- **RAG Mode** — triggered when query contains domain keywords. Retrieves top-5 chunks from ChromaDB and builds a constrained grounding prompt.
+- **LLM Mode** — activated for general queries not matching domain keywords. Direct LLM response, no retrieval.
 
-This system enables users to ask questions via audio and receive answers strictly derived from indexed documents.
+---
 
-
-
-The pipeline integrates:
-
-
-
-\* Speech-to-text transcription (Whisper)
-
-\* Semantic retrieval over PDFs (ChromaDB + MiniLM)
-
-\* Context-grounded response generation using a local LLM (Ollama)
-
-
-
-All components run \*\*locally on CPU\*\*, with no dependency on external APIs or cloud services.
-
-
-
-\---
-
-
-
-\## Key Capabilities
-
-
-
-\* 🎤 Accepts audio queries (WAV/MP3)
-
-\* 🧠 Converts speech to text using Whisper
-
-\* 📄 Retrieves relevant document chunks using vector similarity
-
-\* 🤖 Generates answers grounded strictly in retrieved context
-
-\* 🚫 Prevents hallucination via constrained prompting
-
-\* ⚡ Exposes FastAPI endpoint for real-time interaction
-
-
-
-\---
-
-
-
-\## System Architecture
-
-
-
-!\[Architecture](./assets/architecture.svg)
-
-
-
-\### Pipeline
-
-
-
-Audio
-
-→ Whisper (Speech-to-Text)
-
-→ MiniLM (Embeddings)
-
-→ ChromaDB (Top-K Retrieval)
-
-→ Prompt Builder (Context Injection)
-
-→ Ollama LLM (llama3:8b)
-
-→ JSON Response
-
-
-
-\---
-
-
-
-\## Project Structure
-
-
+## Project Structure
 
 ```
-
 rag-stt-assistant/
-
-
-
-├── main.py
-
-├── ingest.py
-
-├── evaluate.py
-
-├── config.py
-
-├── models.py
-
-
-
+├── main.py                  # FastAPI app entry point + lifespan model loading
+├── ingest.py                # One-time PDF ingestion pipeline
+├── evaluate.py              # Pipeline evaluation (keyword + context match)
+├── config.py                # All settings via pydantic-settings
+├── models.py                # Shared dataclasses (RAGContext, DocumentChunk)
 ├── services/
-
-│   ├── transcriber.py
-
-│   ├── retriever.py
-
-│   ├── prompt\_builder.py
-
-│   └── generator.py
-
-
-
+│   ├── transcriber.py       # Stage 1: Whisper STT
+│   ├── retriever.py         # Stage 2: MiniLM embed + ChromaDB query
+│   ├── prompt_builder.py    # Stage 3: Grounding prompt assembly
+│   └── generator.py        # Stage 4: Ollama httpx call
 ├── routers/
-
-│   └── query.py
-
-
-
-├── docs/
-
-├── chroma\_db/
-
-
-
-├── eval/
-
-│   ├── eval\_dataset.json
-
-│   └── results.json
-
-
-
+│   └── query.py             # POST /query endpoint
+├── static/
+│   └── index.html           # Spotify-inspired frontend
+├── docs/                    # Drop PDFs here
+├── chroma_db/               # Auto-generated vector store (gitignored)
 ├── assets/
-
-│   └── architecture.svg
-
-
-
+│   └── architecture.svg     # Pipeline diagram
 ├── Dockerfile
-
 ├── docker-compose.yml
-
-└── requirements.txt
-
+├── requirements.txt
+└── .env.example
 ```
 
+---
 
+## Setup & Run (Local)
 
-\---
+### Prerequisites
+- Python 3.10+
+- [Ollama](https://ollama.ai) installed
+- ffmpeg installed (`winget install ffmpeg` on Windows)
 
+### Step 1 — Clone and install
 
-
-\## Setup \& Run (Local)
-
-
-
-\### Prerequisites
-
-
-
-\* Python 3.10+
-
-\* Ollama installed and running
-
-
-
-```
-
-ollama pull llama3:8b
-
-```
-
-
-
-\---
-
-
-
-\### Install
-
-
-
-```
+```bash
+git clone https://github.com/YOUR_USERNAME/rag-stt-assistant
+cd rag-stt-assistant
 
 python -m venv .venv
-
-.venv\\Scripts\\activate
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Linux/Mac
 
 pip install -r requirements.txt
-
 ```
 
+### Step 2 — Pull the LLM
 
-
-\---
-
-
-
-\### Step 1 — Ingest Documents
-
-
-
-Place PDFs inside `docs/` and run:
-
-
-
+```bash
+ollama pull llama3.2:1b
 ```
 
+### Step 3 — Ingest your PDFs
+
+Drop any PDF into `docs/` and run:
+
+```bash
 python ingest.py
-
 ```
 
+Output: `[chroma] 33 chunks stored`
 
+### Step 4 — Start Ollama (keep terminal open)
 
-\---
-
-
-
-\### Step 2 — Start API
-
-
-
+```bash
+ollama serve
 ```
 
+### Step 5 — Start the API server (new terminal)
+
+```bash
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
-
 ```
 
+Wait for: `✅ All models loaded. Server is ready.`
 
-
-\---
-
-
-
-\### Step 3 — Query System
-
-
-
-Open:
-
-
+### Step 6 — Open the assistant
 
 ```
-
-http://localhost:8000/docs
-
+http://127.0.0.1:8000         ← GUI
+http://127.0.0.1:8000/docs    ← API explorer (Swagger)
+http://127.0.0.1:8000/health  ← Health check JSON
 ```
 
+---
 
+## Adding Your Own PDFs
 
-Upload audio file to `/query`.
+1. Drop any PDF into `docs/` folder
+2. Run `python ingest.py`
+3. Upload audio asking about that document
+4. Answer is returned with source file name and chunk count
 
+---
 
+## API Usage
 
-\---
+### POST /query
 
+Accepts WAV, MP3, M4A, OGG audio. Returns grounded JSON answer.
 
-
-\## Run with Docker
-
-
-
-\### Build Image
-
-
-
+```bash
+curl -X POST "http://localhost:8000/query" \
+  -F "audio_file=@your_question.wav" \
+  --max-time 300
 ```
 
-docker build -t rag-stt-assistant .
-
+**Response:**
+```json
+{
+  "transcription": "What is the time complexity of binary search?",
+  "query": "What is the time complexity of binary search?",
+  "answer": "Based on the provided documents, binary search has time complexity O(log N).",
+  "sources": ["Complexity Analysis Solution Set.pdf"],
+  "chunks_used": 5,
+  "mode": "RAG"
+}
 ```
 
+### GET /health
 
-
-\### Run Container
-
-
-
+```bash
+curl http://localhost:8000/health
 ```
-
-docker run -p 8002:8000 -v "D:/projects and stuff/rag-stt-assistant/chroma\_db:/app/chroma\_db" rag-stt-assistant
-
-```
-
-
-
-\### Access API
-
-
-
-```
-
-http://localhost:8002/docs
-
-```
-
-
-
-\---
-
-
-
-\## Example Output
-
-
 
 ```json
-
 {
-
-&#x20; "transcription": "what is the time complexity of binary search",
-
-&#x20; "answer": "Binary search has time complexity O(log N).",
-
-&#x20; "sources": \["document.pdf"],
-
-&#x20; "chunks\_used": 5
-
+  "status": "ok",
+  "app": "RAG STT Assistant",
+  "ollama_model": "llama3.2:1b",
+  "whisper_model": "medium",
+  "embed_model": "all-MiniLM-L6-v2"
 }
-
 ```
 
+---
 
+## Evaluation
 
-\---
-
-
-
-\## Evaluation Approach
-
-
-
-Standard asynchronous evaluation frameworks were not used due to constraints of local CPU execution.
-
-
+Standard asynchronous evaluation frameworks (RAGAS) were not used due to the constraint of single-process local CPU — running an LLM judge concurrently with the main model is not feasible in this environment.
 
 Instead, a deterministic evaluation strategy was implemented:
 
+- Retrieved context inspection per question
+- Answer grounding validation (answer derived from chunks, not training memory)
+- Keyword-based correctness matching against expected terms
 
+This ensures responses are traceable to source documents, hallucination is minimised, and outputs are reproducible without external dependencies.
 
-\* Retrieved context inspection
+```bash
+python evaluate.py
+```
 
-\* Answer grounding validation
+---
 
-\* Keyword-based correctness matching
+## Docker
 
+### Build
 
+```bash
+docker build -t rag-stt-assistant .
+```
 
-This ensures that:
+### Run (Ollama on host machine)
 
+```bash
+docker-compose up
+```
 
+The container connects to Ollama running on your host via `host.docker.internal:11434`. Start `ollama serve` before running the container.
 
-\* Responses are derived from source documents
+### Access
 
-\* Hallucination is minimized
+```
+http://localhost:8000
+```
 
-\* Outputs remain interpretable
+---
 
+## Design Decisions & Constraints
 
+### Why not cloud platforms (Vercel / Render / Railway)?
 
-\---
+These platforms are unsuitable for this architecture because:
+- They do not support running local LLM runtimes (Ollama)
+- They restrict long-running CPU-bound processes
+- They are optimised for lightweight web services, not AI inference pipelines
 
+### Why Docker?
 
+- Reproducibility across environments
+- Consistent model loading and execution
+- Full control over local resources
+- No dependency on external APIs
 
-\## Deployment Design Decision
+### System Constraints
 
+| Constraint | Value |
+|---|---|
+| Compute | CPU only, no GPU |
+| RAM available | ~1.9 GB free |
+| LLM | llama3.2:1b (RAM-constrained) |
+| STT | Whisper medium |
+| Inference latency | 30–120s per query on CPU |
+| API cost | $0 |
 
+### Design Philosophy
 
-The system is \*\*containerized using Docker\*\* and designed for \*\*local deployment\*\*.
+- Groundedness over generation speed
+- Reproducibility over scale
+- No hallucination over comprehensive answers
 
+---
 
+## Limitations
 
-\### Why not cloud platforms (Vercel / Netlify / Render / Railway)?
+- CPU inference: Whisper transcription takes 20–60s per query
+- Ollama generation: 30–120s per query on CPU
+- No GPU acceleration (intentional — maximises portability)
+- Retrieval quality depends on PDF structure and chunk quality
+- No large-scale automated evaluation metrics
 
+---
 
+## Future Improvements
 
-These platforms are not suitable for this architecture because:
+- Hybrid retrieval (keyword + vector BM25)
+- Improved chunking strategies (semantic chunking)
+- Optional GPU acceleration path
+- Streaming responses
+- Multi-document filtering by source
 
+---
 
+## License
 
-\* They do not support running local LLM runtimes (Ollama)
-
-\* They restrict long-running CPU-bound processes
-
-\* They are optimized for lightweight web services, not AI pipelines
-
-
-
-\### Why Docker?
-
-
-
-Docker ensures:
-
-
-
-\* Reproducibility across environments
-
-\* Consistent model loading and execution
-
-\* Full control over local resources
-
-\* No dependency on external APIs
-
-
-
-\---
-
-
-
-\## Constraints
-
-
-
-\* CPU-only execution
-
-\* Local LLM (Ollama)
-
-\* No external inference APIs
-
-
-
-\---
-
-
-
-\## Impact
-
-
-
-\* Higher latency compared to GPU systems
-
-\* Limited parallel processing
-
-\* Retrieval quality depends on document structure
-
-
-
-\---
-
-
-
-\## Design Focus
-
-
-
-\* Groundedness over generation
-
-\* Reproducibility over scale
-
-\* System reliability over optimization
-
-
-
-\---
-
-
-
-\## Limitations
-
-
-
-\* Performance constrained by CPU inference
-
-\* No large-scale automated evaluation (e.g., RAGAS)
-
-\* Sensitive to noisy or poorly structured PDFs
-
-
-
-\---
-
-
-
-\## Future Improvements
-
-
-
-\* Hybrid retrieval (keyword + vector)
-
-\* Improved chunking strategies
-
-\* Optional GPU acceleration
-
-\* Lightweight evaluation metrics
-
-
-
-\---
-
-
-
-\## Tech Stack
-
-
-
-\* Python
-
-\* Whisper
-
-\* Sentence Transformers (MiniLM)
-
-\* ChromaDB
-
-\* Ollama (llama3:8b)
-
-\* FastAPI
-
-
-
-\---
-
-
-
-\## Summary
-
-
-
-This project demonstrates a complete \*\*end-to-end local RAG pipeline\*\* capable of answering questions from documents using speech input, while maintaining strict grounding under compute constraints and ensuring reproducible deployment via Docker.
+MIT
 
 
 
